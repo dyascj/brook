@@ -8,7 +8,7 @@ edition = "2024"
 rust-version = "1.90"
 license = "MIT"
 authors = ["Charles Dyas"]
-repository = "https://github.com/dyascj/cozy-rss"
+repository = "https://github.com/dyascj/brook"
 
 [workspace.dependencies]
 brook-core = { path = "crates/brook-core" }

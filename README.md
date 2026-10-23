@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/linux/brook.png" width="112" alt="The Brook icon: a warm sun over two ripples of water">
+  <img src="assets/linux/brook.png" width="112" alt="The Brook icon: an open book with rippling lines and a sun rising over it">
 </p>
 
 <h1 align="center">Brook</h1>
@@ -30,7 +30,7 @@ It's written in Rust with [GPUI](https://www.gpui.rs), the GPU-accelerated UI fr
 
 ## Install
 
-Download the latest build from [Releases](https://github.com/dyascj/cozy-rss/releases/latest).
+Download the latest build from [Releases](https://github.com/dyascj/brook/releases/latest).
 
 **macOS** (13 Ventura or later, Apple silicon and Intel): unzip `Brook.zip` and drag Brook to Applications. The app is signed ad hoc rather than notarized, so the first time, right-click it and choose **Open**, or run:
 

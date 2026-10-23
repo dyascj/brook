@@ -38,7 +38,7 @@ Quiet and short. Rows lift to full-strength text on hover; icon buttons gain a 5
 
 ## The brand
 
-**Brook** is a stream of the things you chose to read. The icon is a sunrise over a brook: a warm sun above two ripples of water, on a blue squircle. Squint and the ripples are lines of text.
+**Brook** is a stream of the things you chose to read. The icon is an open book on a blue squircle with a warm sun rising over it; its lines of text are ripples of water, the brook.
 
 - `assets/brand/icon.svg` is the source of truth for the app icon; `scripts/make-icons.sh` renders the `.icns` and Linux PNG from it.
 - `assets/brand/mark.svg` is the same drawing in one color, for empty states and About.

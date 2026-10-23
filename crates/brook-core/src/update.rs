@@ -22,9 +22,9 @@ use crate::http::Client;
 pub const CURRENT: &str = env!("CARGO_PKG_VERSION");
 
 /// Where releases are published.
-pub const RELEASES_URL: &str = "https://github.com/dyascj/cozy-rss/releases/latest";
+pub const RELEASES_URL: &str = "https://github.com/dyascj/brook/releases/latest";
 
-const FEED: &str = "https://api.github.com/repos/dyascj/cozy-rss/releases/latest";
+const FEED: &str = "https://api.github.com/repos/dyascj/brook/releases/latest";
 
 /// Release builds are signed in CI with the matching secret key.
 pub const PUBLIC_KEY: &str = "RWR/D8rYwr7IIakiLumdMumb2LWFXskkdgcMCY4ZVxakZ+CrCCTlPCuX";

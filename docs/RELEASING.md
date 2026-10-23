@@ -23,7 +23,7 @@ The `release` workflow refuses a tag that doesn't match `Cargo.toml` or has no n
 
 ## How updates are verified
 
-`brook_core::update` asks `https://api.github.com/repos/dyascj/cozy-rss/releases/latest` for the newest release. It only takes a release that:
+`brook_core::update` asks `https://api.github.com/repos/dyascj/brook/releases/latest` for the newest release. It only takes a release that:
 
 - is newer than the running version, compared numerically (`v0.10.0` beats `v0.9.9`; pre-release tags such as `v1.0.0-beta.1` never count);
 - has this platform's asset and its `.minisig`;

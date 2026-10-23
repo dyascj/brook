@@ -349,7 +349,8 @@ impl Render for Workspace {
             .size_full()
             .flex()
             .flex_col()
-            .bg(p.window)
+            // Root already paints the window color; painting it again would
+            // double the glass tint.
             .text_color(p.text)
             .key_context(WORKSPACE)
             .on_action(

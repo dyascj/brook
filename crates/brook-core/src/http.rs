@@ -13,7 +13,7 @@ use crate::store::HttpCache;
 
 /// The `User-Agent` Brook sends. Some sites refuse requests without one.
 pub const USER_AGENT: &str =
-    concat!("Brook/", env!("CARGO_PKG_VERSION"), " (+https://github.com/dyascj/cozy-rss)");
+    concat!("Brook/", env!("CARGO_PKG_VERSION"), " (+https://github.com/dyascj/brook)");
 
 /// What feed requests accept, most specific first.
 pub const ACCEPT_FEED: &str = "application/rss+xml, application/atom+xml, application/feed+json, \
