@@ -27,6 +27,7 @@ pub mod settings;
 pub mod store;
 pub mod text;
 pub mod time;
+pub mod update;
 pub mod video;
 
 #[cfg(test)]

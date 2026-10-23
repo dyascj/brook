@@ -15,6 +15,7 @@ dom_smoothie.workspace = true
 ego-tree.workspace = true
 feed-rs.workspace = true
 log.workspace = true
+minisign-verify.workspace = true
 quick-xml.workspace = true
 rusqlite.workspace = true
 scraper.workspace = true
