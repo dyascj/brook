@@ -7,7 +7,7 @@ use gpui::{AnyElement, App, Context, Entity, FontWeight, SharedString, Window, d
 use gpui_component::WindowExt;
 use gpui_component::switch::Switch;
 
-use crate::actions::{self, ExportOpml, ImportOpml};
+use crate::actions;
 use crate::assets::{MARK, icon};
 use crate::components::{hairline, icon as draw_icon, segmented, spinner};
 use crate::library::Library;
@@ -187,6 +187,7 @@ impl Render for SettingsView {
         let library = self.library.clone();
         let (appearance_library, size_library, refresh_library) =
             (library.clone(), library.clone(), library.clone());
+        let (import_library, export_library) = (library.clone(), library.clone());
         let refresh_options: Vec<(u32, &'static str)> =
             REFRESH_CHOICES.iter().map(|&minutes| (minutes, refresh_label(minutes))).collect();
         let modifier = if cfg!(target_os = "macos") { "⌘" } else { "Ctrl" };
@@ -299,15 +300,15 @@ impl Render for SettingsView {
                             .child(
                                 self.button("import", "Import…", cx)
                                     .child(draw_icon(icon::IMPORT, 13., p.muted()))
-                                    .on_click(|_, window, cx| {
-                                        window.dispatch_action(Box::new(ImportOpml), cx)
+                                    .on_click(move |_, _, cx| {
+                                        crate::workspace::import_opml(import_library.clone(), cx)
                                     }),
                             )
                             .child(
                                 self.button("export", "Export…", cx)
                                     .child(draw_icon(icon::EXPORT, 13., p.muted()))
-                                    .on_click(|_, window, cx| {
-                                        window.dispatch_action(Box::new(ExportOpml), cx)
+                                    .on_click(move |_, _, cx| {
+                                        crate::workspace::export_opml(export_library.clone(), cx)
                                     }),
                             )
                             .into_any_element(),

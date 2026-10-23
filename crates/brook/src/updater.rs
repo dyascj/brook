@@ -132,10 +132,9 @@ impl Updater {
         };
         self.status = Status::Installing(release.clone());
         cx.notify();
-        let client = self.library.read(cx).client().clone();
         let work = {
             let release = release.clone();
-            cx.background_spawn(async move { update::install(&client, &release) })
+            cx.background_spawn(async move { update::install(&release) })
         };
         cx.spawn(async move |this, cx| {
             let result = work.await;

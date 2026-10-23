@@ -23,13 +23,14 @@ enum State {
 /// Downloaded images, by address.
 pub struct Images {
     cache: DiskCache,
-    client: Client,
+    /// `None` keeps to what's already on disk (tests, screenshots).
+    client: Option<Client>,
     states: HashMap<String, State>,
 }
 
 impl Images {
-    /// Images stored in `cache`, fetched with `client`.
-    pub fn new(cache: DiskCache, client: Client) -> Self {
+    /// Images stored in `cache`, downloaded with `client` when there is one.
+    pub fn new(cache: DiskCache, client: Option<Client>) -> Self {
         Self { cache, client, states: HashMap::new() }
     }
 
@@ -43,7 +44,8 @@ impl Images {
             self.states.insert(url.to_owned(), State::Ready(path.clone()));
             return Some(path);
         }
-        let (cache, client, key) = (self.cache.clone(), self.client.clone(), url.to_owned());
+        let client = self.client.clone()?;
+        let (cache, key) = (self.cache.clone(), url.to_owned());
         self.load(url.to_owned(), cx, move || cache.fetch_image(&client, &key).ok());
         None
     }
@@ -71,8 +73,8 @@ impl Images {
             self.states.insert(key, State::Ready(path.clone()));
             return Some(path);
         }
-        let site = site.to_owned();
-        let (cache, client) = (self.cache.clone(), self.client.clone());
+        let client = self.client.clone()?;
+        let (site, cache) = (site.to_owned(), self.cache.clone());
         self.load(key, cx, move || cache.fetch_icon(&client, &site).ok());
         None
     }

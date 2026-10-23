@@ -95,21 +95,34 @@ impl DiskCache {
         }
 
         let origin = site.join("/").expect("an absolute URL joins a path");
-        let declared =
-            client.get(origin.as_str(), ACCEPT_HTML).ok().filter(|page| page.is_html()).map(|page| {
+        // Whether the site answered at all. A network failure isn't a site
+        // without an icon, and shouldn't be remembered as one.
+        let mut reached = false;
+        let declared = match client.get(origin.as_str(), ACCEPT_HTML) {
+            Ok(page) => {
+                reached = true;
                 let base = Url::parse(&page.url).unwrap_or(origin.clone());
-                icon_links(&page.text(), &base)
-            });
-        let candidates =
-            declared.into_iter().flatten().chain(origin.join("/favicon.ico").ok().map(String::from));
-        for candidate in candidates {
-            if let Ok(page) = client.get(&candidate, ACCEPT_IMAGE)
-                && !page.is_html()
-                && !page.body.is_empty()
-            {
-                write_atomically(&path, &page.body)?;
-                return Ok(path);
+                if page.is_html() { icon_links(&page.text(), &base) } else { vec![] }
             }
+            Err(Error::Status { .. }) => {
+                reached = true;
+                vec![]
+            }
+            Err(_) => vec![],
+        };
+        let candidates = declared.into_iter().chain(origin.join("/favicon.ico").ok().map(String::from));
+        for candidate in candidates {
+            match client.get(&candidate, ACCEPT_IMAGE) {
+                Ok(page) if !page.is_html() && !page.body.is_empty() => {
+                    write_atomically(&path, &page.body)?;
+                    return Ok(path);
+                }
+                Ok(_) | Err(Error::Status { .. }) => reached = true,
+                Err(_) => {}
+            }
+        }
+        if !reached {
+            return Err(Error::Network(format!("couldn't reach {host}")));
         }
         write_atomically(&path, &[])?;
         Err(Error::NotFound("icon"))
@@ -265,6 +278,16 @@ mod tests {
         assert!(matches!(cache.fetch_icon(&client, &server.url("/")), Err(Error::NotFound(_))));
         assert_eq!(server.hits(), hits, "the miss is remembered");
         assert_eq!(cache.cached_icon("127.0.0.1"), None);
+    }
+
+    #[test]
+    fn network_failures_are_not_remembered() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::new(dir.path());
+        // Nothing listens on port 9 (discard) in a test sandbox.
+        let error = cache.fetch_icon(&Client::default(), "http://127.0.0.1:9/").unwrap_err();
+        assert!(matches!(error, Error::Network(_)), "{error}");
+        assert!(!cache.icon_path("127.0.0.1").exists(), "no marker, so the next launch tries again");
     }
 
     #[test]

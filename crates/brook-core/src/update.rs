@@ -156,8 +156,10 @@ fn remove(path: &Path) {
 
 /// Downloads, verifies, and installs `release`. Brook keeps running the old
 /// code until [`relaunch`].
-pub fn install(client: &Client, release: &Release) -> Result<()> {
+pub fn install(release: &Release) -> Result<()> {
     let asset = asset_name().ok_or(Error::NotFound("build for this platform"))?;
+    // Builds are tens of megabytes: allow slow connections, not stalled ones.
+    let client = Client::for_downloads(std::time::Duration::from_secs(30));
     let data = client.get(&release.url, "application/octet-stream")?.body;
     let signature = client.get(&release.signature_url, "text/plain")?.text();
     if !verify(PUBLIC_KEY, &data, &signature, &signed_comment(&release.version, asset)) {

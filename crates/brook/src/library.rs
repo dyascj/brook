@@ -119,6 +119,11 @@ pub struct Library {
     pub open: Option<OpenArticle>,
     /// The running refresh.
     pub progress: Option<Progress>,
+    /// Feeds asked for while a refresh ran; fetched when it ends.
+    queued: Vec<Feed>,
+    /// The newest article when the list was loaded, so "mark all read"
+    /// never reaches articles nobody has seen yet.
+    shown_up_to: ArticleId,
     _due_loop: Task<()>,
 }
 
@@ -153,6 +158,8 @@ impl Library {
             articles: vec![],
             open: None,
             progress: None,
+            queued: vec![],
+            shown_up_to: ArticleId(0),
             _due_loop: due_loop,
         };
         library.reload_quietly();
@@ -211,6 +218,7 @@ impl Library {
             self.folders = self.store.folders()?;
             self.feeds = self.store.feeds()?;
             self.counts = self.store.counts(time::local_start_of_today())?;
+            self.shown_up_to = self.store.newest_article_id()?;
             self.articles = self.store.articles(&self.query())?;
             Ok(())
         })();
@@ -244,7 +252,9 @@ impl Library {
     }
 
     fn reload_articles(&mut self, cx: &mut Context<Self>) {
-        if let Some(articles) = self.report(self.store.articles(&self.query()), cx) {
+        let newest = self.store.newest_article_id();
+        if let (Ok(newest), Some(articles)) = (newest, self.report(self.store.articles(&self.query()), cx)) {
+            self.shown_up_to = newest;
             self.articles = articles;
         }
         cx.notify();
@@ -362,12 +372,20 @@ impl Library {
         }
     }
 
-    /// Marks everything in `scope` read.
+    /// Marks everything in `scope` read. While searching, only the matches
+    /// in the list are marked. Articles that arrived after the list was last
+    /// loaded are spared either way.
     pub fn mark_all_read(&mut self, scope: Scope, cx: &mut Context<Self>) {
-        let now = Utc::now();
-        if self.report(self.store.mark_all_read(scope, time::local_start_of_today(), now), cx).is_some() {
-            if let Some(open) = &mut self.open {
-                open.article.summary.read |= scope == self.scope;
+        let searching = scope == self.scope && !self.search.trim().is_empty();
+        let marked = if searching {
+            let ids: Vec<ArticleId> = self.articles.iter().filter(|a| !a.read).map(|a| a.id).collect();
+            self.store.set_read(&ids, true, Utc::now()).map(|()| ids.len())
+        } else {
+            self.store.mark_all_read(scope, time::local_start_of_today(), self.shown_up_to)
+        };
+        if self.report(marked, cx).is_some() {
+            if let Some(open) = self.open.as_mut().filter(|_| scope == self.scope) {
+                open.article.summary.read = true;
             }
             self.reload_counts(cx);
             self.reload_articles(cx);
@@ -610,9 +628,18 @@ impl Library {
         self.refresh(due, cx);
     }
 
-    /// Fetches `feeds` in the background. Does nothing while a refresh runs.
+    /// Fetches `feeds` in the background. While a refresh runs, they wait
+    /// their turn and go next.
     pub fn refresh(&mut self, feeds: Vec<Feed>, cx: &mut Context<Self>) {
-        if feeds.is_empty() || self.progress.is_some() {
+        if feeds.is_empty() {
+            return;
+        }
+        if self.progress.is_some() {
+            for feed in feeds {
+                if !self.queued.iter().any(|queued| queued.id == feed.id) {
+                    self.queued.push(feed);
+                }
+            }
             return;
         }
         self.progress = Some(Progress { done: 0, total: feeds.len() });
@@ -645,25 +672,44 @@ impl Library {
                 if let Err(error) = result {
                     cx.emit(Notice::Error(format!("Refresh failed: {error}").into()));
                 }
-                this.reload_quietly_keeping_list(cx);
+                this.reload_keeping_list(cx);
+                let queued = std::mem::take(&mut this.queued);
+                this.refresh(queued, cx);
             })
             .ok();
         })
         .detach();
     }
 
-    /// After a refresh: new articles appear, but a list someone is reading
-    /// doesn't jump. Rows already shown keep their place; new ones join at
-    /// the top.
-    fn reload_quietly_keeping_list(&mut self, cx: &mut Context<Self>) {
+    /// After a refresh: new articles appear, but rows already shown stay,
+    /// even ones the list would now hide (an article read while "unread
+    /// only" is on), so the reader's place in the list holds.
+    fn reload_keeping_list(&mut self, cx: &mut Context<Self>) {
         let (folders, feeds) = (self.store.folders(), self.store.feeds());
         if let (Ok(folders), Ok(feeds)) = (folders, feeds) {
             self.folders = folders;
             self.feeds = feeds;
+            // Rows from feeds unsubscribed meanwhile go.
+            self.articles.retain(|row| self.feeds.iter().any(|feed| feed.id == row.feed_id));
         }
+        let shown = std::mem::take(&mut self.articles);
         self.reload_counts(cx);
         self.reload_articles(cx);
+        self.articles = keep_shown(shown, std::mem::take(&mut self.articles));
     }
+}
+
+/// Merges a fresh list into the one on screen: fresh rows win, and shown
+/// rows missing from the fresh list keep their place. Newest first.
+fn keep_shown(shown: Vec<ArticleSummary>, fresh: Vec<ArticleSummary>) -> Vec<ArticleSummary> {
+    let mut merged = fresh;
+    for row in shown {
+        if !merged.iter().any(|fresh| fresh.id == row.id) {
+            merged.push(row);
+        }
+    }
+    merged.sort_by(|a, b| b.published_at.cmp(&a.published_at).then(b.id.cmp(&a.id)));
+    merged
 }
 
 #[cfg(test)]
@@ -769,6 +815,59 @@ mod tests {
             assert!(library.articles.is_empty());
             assert_eq!(library.scope_unread(), 0);
         });
+    }
+
+    #[gpui::test]
+    fn mark_all_read_while_searching_marks_only_matches(cx: &mut TestAppContext) {
+        let (library, _dir) = library(cx);
+        seed(&library, cx, &["apples", "pears", "plums"]);
+        library.update(cx, |library, cx| {
+            library.set_search("apples", cx);
+            library.mark_all_read(Scope::All, cx);
+            library.set_search("", cx);
+            assert_eq!(library.counts.all, 2, "only the match was marked");
+        });
+    }
+
+    #[gpui::test]
+    fn mark_all_read_spares_articles_not_yet_shown(cx: &mut TestAppContext) {
+        let (library, _dir) = library(cx);
+        let feed = seed(&library, cx, &["one"]);
+        library.update(cx, |library, cx| {
+            // A refresh stores an article the list hasn't loaded yet.
+            let late = ParsedEntry {
+                guid: "late".into(),
+                title: "late".into(),
+                url: None,
+                author: None,
+                excerpt: String::new(),
+                content_html: None,
+                image_url: None,
+                published_at: Some(Utc::now()),
+            };
+            library.store.upsert_entries(feed, &[late], Utc::now()).unwrap();
+            library.mark_all_read(Scope::All, cx);
+            assert_eq!(library.counts.all, 1, "the late article stays unread");
+        });
+    }
+
+    #[test]
+    fn refreshed_lists_keep_shown_rows() {
+        let row = |id: i64, minutes: i64, title: &str| ArticleSummary {
+            id: ArticleId(id),
+            feed_id: FeedId(1),
+            title: title.into(),
+            excerpt: String::new(),
+            image_url: None,
+            published_at: chrono::DateTime::from_timestamp(minutes * 60, 0).unwrap(),
+            read: false,
+            starred: false,
+            saved: false,
+        };
+        let shown = vec![row(2, 20, "open, now read"), row(1, 10, "old")];
+        let fresh = vec![row(3, 30, "new"), row(1, 10, "old, edited")];
+        let titles: Vec<String> = keep_shown(shown, fresh).into_iter().map(|r| r.title).collect();
+        assert_eq!(titles, ["new", "open, now read", "old, edited"]);
     }
 
     #[gpui::test]

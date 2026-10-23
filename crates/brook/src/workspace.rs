@@ -32,7 +32,10 @@ pub struct Workspace {
     list: Entity<ArticleList>,
     reader: Entity<Reader>,
     discover: Entity<Discover>,
+    /// The reading area: the list and reader, where single keys work.
     reading: FocusHandle,
+    /// The whole window, for when the reading area isn't on screen.
+    focus: FocusHandle,
     sidebar_open: bool,
     _subscriptions: Vec<Subscription>,
 }
@@ -47,6 +50,7 @@ impl Workspace {
         cx: &mut Context<Self>,
     ) -> Self {
         let reading = cx.focus_handle();
+        let focus = cx.focus_handle();
         let sidebar = cx.new(|cx| Sidebar::new(library.clone(), images.clone(), cx));
         let list =
             cx.new(|cx| ArticleList::new(library.clone(), images.clone(), reading.clone(), window, cx));
@@ -54,7 +58,10 @@ impl Workspace {
         let discover = cx.new(|cx| Discover::new(library.clone(), images.clone(), window, cx));
 
         let subscriptions = vec![
-            cx.observe(&library, |_, _, cx| cx.notify()),
+            cx.observe_in(&library, window, |this, _, window, cx| {
+                this.place_focus(window, cx);
+                cx.notify();
+            }),
             cx.observe(&updater, |_, _, cx| cx.notify()),
             cx.subscribe_in(&library, window, |_, _, notice: &Notice, window, cx| show(notice, window, cx)),
             cx.subscribe_in(&updater, window, |_, _, notice: &Notice, window, cx| show(notice, window, cx)),
@@ -65,8 +72,7 @@ impl Workspace {
                 }
             }),
         ];
-        reading.focus(window, cx);
-        Self {
+        let mut workspace = Self {
             library,
             updater,
             sidebar,
@@ -74,8 +80,30 @@ impl Workspace {
             reader,
             discover,
             reading,
+            focus,
             sidebar_open: true,
             _subscriptions: subscriptions,
+        };
+        workspace.focus.focus(window, cx);
+        workspace.place_focus(window, cx);
+        workspace
+    }
+
+    /// Whether the article list and reader are on screen.
+    fn reading_visible(&self, cx: &App) -> bool {
+        let library = self.library.read(cx);
+        library.page == Page::Reading && !library.feeds.is_empty()
+    }
+
+    /// Keeps focus somewhere that's on screen, so shortcuts and menus always
+    /// reach the workspace: the reading area when it shows, otherwise the
+    /// window. Focus inside a field or dialog is left alone.
+    fn place_focus(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let visible = self.reading_visible(cx);
+        if visible && self.focus.is_focused(window) {
+            self.reading.focus(window, cx);
+        } else if !visible && self.reading.is_focused(window) {
+            self.focus.focus(window, cx);
         }
     }
 
@@ -97,33 +125,11 @@ impl Workspace {
     }
 
     fn import_opml(&mut self, _: &ImportOpml, _: &mut Window, cx: &mut Context<Self>) {
-        let paths = cx.prompt_for_paths(PathPromptOptions {
-            files: true,
-            directories: false,
-            multiple: false,
-            prompt: Some("Import".into()),
-        });
-        let library = self.library.clone();
-        cx.spawn(async move |_, cx| {
-            if let Ok(Ok(Some(paths))) = paths.await
-                && let Some(path) = paths.first()
-            {
-                library.update(cx, |library, cx| library.import_opml(path, cx));
-            }
-        })
-        .detach();
+        import_opml(self.library.clone(), cx);
     }
 
     fn export_opml(&mut self, _: &ExportOpml, _: &mut Window, cx: &mut Context<Self>) {
-        let folder = dirs_home().join("Documents");
-        let path = cx.prompt_for_new_path(&folder, Some("Brook subscriptions.opml"));
-        let library = self.library.clone();
-        cx.spawn(async move |_, cx| {
-            if let Ok(Ok(Some(path))) = path.await {
-                library.update(cx, |library, cx| library.export_opml(&path, cx));
-            }
-        })
-        .detach();
+        export_opml(self.library.clone(), cx);
     }
 
     fn about(&mut self, _: &About, window: &mut Window, cx: &mut Context<Self>) {
@@ -338,7 +344,7 @@ impl Workspace {
 
 impl Focusable for Workspace {
     fn focus_handle(&self, _: &App) -> FocusHandle {
-        self.reading.clone()
+        self.focus.clone()
     }
 }
 
@@ -353,6 +359,7 @@ impl Render for Workspace {
             // double the glass tint.
             .text_color(p.text)
             .key_context(WORKSPACE)
+            .track_focus(&self.focus)
             .on_action(
                 cx.listener(|this, _: &AddFeed, window, cx| add_feed::open(this.library.clone(), window, cx)),
             )
@@ -436,6 +443,36 @@ impl Render for Workspace {
     }
 }
 
+/// Asks for an OPML file and imports it.
+pub fn import_opml(library: Entity<Library>, cx: &mut App) {
+    let paths = cx.prompt_for_paths(PathPromptOptions {
+        files: true,
+        directories: false,
+        multiple: false,
+        prompt: Some("Import".into()),
+    });
+    cx.spawn(async move |cx| {
+        if let Ok(Ok(Some(paths))) = paths.await
+            && let Some(path) = paths.first()
+        {
+            library.update(cx, |library, cx| library.import_opml(path, cx));
+        }
+    })
+    .detach();
+}
+
+/// Asks where to save, and exports subscriptions as OPML there.
+pub fn export_opml(library: Entity<Library>, cx: &mut App) {
+    let folder = dirs_home().join("Documents");
+    let path = cx.prompt_for_new_path(&folder, Some("Brook subscriptions.opml"));
+    cx.spawn(async move |cx| {
+        if let Ok(Ok(Some(path))) = path.await {
+            library.update(cx, |library, cx| library.export_opml(&path, cx));
+        }
+    })
+    .detach();
+}
+
 /// Shows a notice as a toast.
 fn show(notice: &Notice, window: &mut Window, cx: &mut App) {
     let note = match notice {
@@ -447,4 +484,45 @@ fn show(notice: &Notice, window: &mut Window, cx: &mut App) {
 
 fn dirs_home() -> std::path::PathBuf {
     std::env::var_os("HOME").map(Into::into).unwrap_or_else(std::env::temp_dir)
+}
+
+#[cfg(test)]
+mod tests {
+    use gpui::{TestAppContext, VisualTestContext};
+    use gpui_component::{Root, WindowExt};
+
+    /// Opens the real window content over an empty library in `dir`.
+    fn open<'a>(cx: &'a mut TestAppContext, dir: &std::path::Path) -> &'a mut VisualTestContext {
+        cx.update(crate::init);
+        let (db, cache) = (dir.join("brook.db"), dir.join("cache"));
+        let (_, cx) = cx.add_window_view(|window, cx| {
+            let workspace = crate::workspace(&db, &cache, false, window, cx).unwrap();
+            Root::new(workspace, window, cx)
+        });
+        cx.run_until_parked();
+        cx
+    }
+
+    #[gpui::test]
+    fn shortcuts_work_on_the_welcome_screen(cx: &mut TestAppContext) {
+        let dir = tempfile::tempdir().unwrap();
+        let cx = open(cx, dir.path());
+        cx.simulate_keystrokes("ctrl-n");
+        cx.run_until_parked();
+        assert!(cx.update(|window, cx| window.has_active_dialog(cx)), "Add a feed opened");
+    }
+
+    #[gpui::test]
+    fn shortcuts_work_from_discover(cx: &mut TestAppContext) {
+        let dir = tempfile::tempdir().unwrap();
+        let cx = open(cx, dir.path());
+        cx.simulate_keystrokes("ctrl-,");
+        cx.run_until_parked();
+        assert!(cx.update(|window, cx| window.has_active_dialog(cx)), "Settings opened");
+        cx.update(|window, cx| window.close_all_dialogs(cx));
+        cx.dispatch_action(crate::actions::ShowDiscover);
+        cx.simulate_keystrokes("ctrl-n");
+        cx.run_until_parked();
+        assert!(cx.update(|window, cx| window.has_active_dialog(cx)), "Add a feed opened from Discover");
+    }
 }

@@ -49,8 +49,19 @@ fn fetch(client: &Client, url: &str, cache: &HttpCache) -> Result<Fetch> {
     }
 }
 
-/// Stores a fetch result and returns the outcome.
-fn store_result(store: &mut Store, feed: FeedId, fetched: Result<Fetch>, now: DateTime<Utc>) -> Outcome {
+/// Stores a fetch result and returns the outcome. A feed unsubscribed
+/// while it was being fetched is skipped, even if a new feed has since taken
+/// its id.
+fn store_result(
+    store: &mut Store,
+    feed: FeedId,
+    url: &str,
+    fetched: Result<Fetch>,
+    now: DateTime<Utc>,
+) -> Outcome {
+    if !store.feed(feed).is_ok_and(|current| current.url == url) {
+        return Outcome { feed, result: Err("unsubscribed while refreshing".into()) };
+    }
     let result = match fetched {
         Ok(Fetch::Unchanged) => store.http_cache(feed).and_then(|cache| {
             store.record_fetch_success(feed, &cache, None, now)?;
@@ -100,7 +111,8 @@ pub fn refresh(
                 loop {
                     let next = queue.lock().map(|mut jobs| jobs.next()).ok().flatten();
                     let Some((id, url, cache)) = next else { break };
-                    if sender.send((id, fetch(client, &url, &cache))).is_err() {
+                    let fetched = fetch(client, &url, &cache);
+                    if sender.send((id, url, fetched)).is_err() {
                         break;
                     }
                 }
@@ -110,8 +122,8 @@ pub fn refresh(
 
         receiver
             .into_iter()
-            .map(|(id, fetched)| {
-                let outcome = store_result(store, id, fetched, Utc::now());
+            .map(|(id, url, fetched)| {
+                let outcome = store_result(store, id, &url, fetched, Utc::now());
                 on_outcome(&outcome);
                 outcome
             })
@@ -207,6 +219,21 @@ mod tests {
         assert_eq!(refresh(&mut store, &client, std::slice::from_ref(&feed), |_| {})[0].result, Ok(0));
         assert_eq!(store.feed(feed.id).unwrap().last_error, None);
         assert_eq!(server.hits(), 2);
+    }
+
+    #[test]
+    fn unsubscribed_feeds_are_skipped_even_if_their_id_is_reused() {
+        let server = TestServer::start(vec![Route::new("/old", rss(&["1"]))]);
+        let mut store = Store::open_in_memory().unwrap();
+        let old = subscribe(&store, &server.url("/old"));
+        store.delete_feed(old.id).unwrap();
+        let new = subscribe(&store, "https://elsewhere.test/rss");
+        assert_eq!(new.id, old.id, "SQLite reuses the freed id");
+
+        let outcomes = refresh(&mut store, &Client::default(), &[old], |_| {});
+        assert_eq!(outcomes[0].result, Err("unsubscribed while refreshing".into()));
+        assert!(store.articles(&ArticleQuery::new(Scope::All, Utc::now())).unwrap().is_empty());
+        assert_eq!(store.feed(new.id).unwrap().last_fetched_at, None);
     }
 
     #[test]

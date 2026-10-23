@@ -22,8 +22,11 @@ pub const ACCEPT_FEED: &str = "application/rss+xml, application/atom+xml, applic
 /// What page requests accept.
 pub const ACCEPT_HTML: &str = "text/html, application/xhtml+xml;q=0.9, */*;q=0.5";
 
-/// The largest response body Brook reads.
+/// The largest feed, page, or image Brook reads.
 const MAX_BODY_BYTES: u64 = 25 * 1024 * 1024;
+
+/// The largest download, for app updates.
+const MAX_DOWNLOAD_BYTES: u64 = 500 * 1024 * 1024;
 
 /// A fetched document.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -63,6 +66,7 @@ pub enum Fetched {
 #[derive(Clone, Debug)]
 pub struct Client {
     agent: ureq::Agent,
+    max_body: u64,
 }
 
 impl Default for Client {
@@ -72,7 +76,8 @@ impl Default for Client {
 }
 
 impl Client {
-    /// A client whose requests give up after `timeout`.
+    /// A client whose requests give up after `timeout`, for feeds, pages,
+    /// and images.
     pub fn new(timeout: Duration) -> Self {
         let agent = ureq::Agent::config_builder()
             .user_agent(USER_AGENT)
@@ -80,7 +85,22 @@ impl Client {
             .max_redirects(10)
             .build()
             .into();
-        Self { agent }
+        Self { agent, max_body: MAX_BODY_BYTES }
+    }
+
+    /// A client for large downloads: no limit on the whole transfer, so a
+    /// slow connection still finishes, but it gives up when the connection
+    /// stalls for `stall`.
+    pub fn for_downloads(stall: Duration) -> Self {
+        let agent = ureq::Agent::config_builder()
+            .user_agent(USER_AGENT)
+            .timeout_connect(Some(stall))
+            .timeout_recv_response(Some(stall))
+            .timeout_per_read(Some(stall))
+            .max_redirects(10)
+            .build()
+            .into();
+        Self { agent, max_body: MAX_DOWNLOAD_BYTES }
     }
 
     /// Fetches `url` unconditionally.
@@ -120,7 +140,7 @@ impl Client {
         let body = response
             .body_mut()
             .with_config()
-            .limit(MAX_BODY_BYTES)
+            .limit(self.max_body)
             .read_to_vec()
             .map_err(|error| Error::Network(error.to_string()))?;
         Ok(Fetched::Page(Page { url: final_url, content_type, body, cache }))
@@ -161,6 +181,13 @@ mod tests {
         let page = Client::default().get(&server.url("/old"), ACCEPT_HTML).unwrap();
         assert_eq!(page.url, server.url("/new"));
         assert!(page.is_html());
+    }
+
+    #[test]
+    fn download_clients_fetch_too() {
+        let server = TestServer::start(vec![Route::new("/big", vec![7u8; 64 * 1024])]);
+        let page = Client::for_downloads(Duration::from_secs(5)).get(&server.url("/big"), "*/*").unwrap();
+        assert_eq!(page.body.len(), 64 * 1024);
     }
 
     #[test]

@@ -390,12 +390,23 @@ impl Sink {
     }
 }
 
-/// Trims whitespace at both ends of a run of spans, and around line
-/// breaks, dropping spans left empty.
+/// Trims whitespace at both ends of a run of spans, and on either side of
+/// each line break, dropping spans left empty. A span's outer ends are left
+/// alone, so the space before a link survives.
 fn tidy(mut spans: Vec<Span>) -> Vec<Span> {
     for span in &mut spans {
         if span.text.contains('\n') {
-            span.text = span.text.split('\n').map(str::trim).collect::<Vec<_>>().join("\n");
+            let lines: Vec<&str> = span.text.split('\n').collect();
+            let last = lines.len() - 1;
+            span.text = lines
+                .iter()
+                .enumerate()
+                .map(|(index, line)| {
+                    let line = if index < last { line.trim_end() } else { line };
+                    if index > 0 { line.trim_start() } else { line }
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
         }
     }
     while let Some(first) = spans.first_mut() {
@@ -474,6 +485,21 @@ mod tests {
     #[test]
     fn bare_text_and_line_breaks() {
         assert_eq!(doc("first line <br/>  second line"), [para(vec![text("first line\nsecond line")])]);
+    }
+
+    #[test]
+    fn line_breaks_keep_the_spaces_around_neighbors() {
+        let link =
+            Span { text: "docs".into(), marks: Marks::default(), link: Some("https://site.test/d".into()) };
+        assert_eq!(
+            doc(r#"First line<br>Read the <a href="/d">docs</a>"#),
+            [para(vec![text("First line\nRead the "), link])]
+        );
+        let bold = Marks { bold: true, ..Marks::default() };
+        assert_eq!(
+            doc("<b>Note:</b> see<br>below"),
+            [para(vec![styled("Note:", bold), text(" see\nbelow")])]
+        );
     }
 
     #[test]

@@ -220,21 +220,23 @@ impl Store {
         Ok(())
     }
 
-    /// Marks everything in `scope` read, except articles fetched after
-    /// `fetched_before`, so a refresh that lands mid-click isn't swallowed.
-    /// Returns how many changed.
-    pub fn mark_all_read(
-        &self,
-        scope: Scope,
-        today_start: DateTime<Utc>,
-        fetched_before: DateTime<Utc>,
-    ) -> Result<usize> {
+    /// The newest article's id, or zero when there are none. Ids only grow,
+    /// so this marks what existed at a moment; see [`Store::mark_all_read`].
+    pub fn newest_article_id(&self) -> Result<ArticleId> {
+        Ok(ArticleId(self.conn.query_row("SELECT COALESCE(MAX(id), 0) FROM articles", [], |row| row.get(0))?))
+    }
+
+    /// Marks everything in `scope` read, up to and including article
+    /// `up_to` (from [`Store::newest_article_id`] when the list was shown), so
+    /// a refresh that lands mid-click isn't swallowed. Returns how many
+    /// changed.
+    pub fn mark_all_read(&self, scope: Scope, today_start: DateTime<Utc>, up_to: ArticleId) -> Result<usize> {
         let (scope_sql, mut values) = scope_filter(scope, today_start);
         let sql = format!(
             "UPDATE articles AS a SET read_at = ?
-             WHERE a.read_at IS NULL AND a.fetched_at <= ? AND {scope_sql}"
+             WHERE a.read_at IS NULL AND a.id <= ? AND {scope_sql}"
         );
-        let mut all = vec![Value::Integer(to_secs(Utc::now())), Value::Integer(to_secs(fetched_before))];
+        let mut all = vec![Value::Integer(to_secs(Utc::now())), Value::Integer(up_to.0)];
         all.append(&mut values);
         Ok(self.conn.execute(&sql, params_from_iter(all))?)
     }
@@ -458,9 +460,12 @@ mod tests {
     #[test]
     fn mark_all_read_spares_late_arrivals() {
         let (mut store, feed) = store_with_feed();
+        assert_eq!(store.newest_article_id().unwrap(), ArticleId(0));
         store.upsert_entries(feed, &[entry("1", "Before", Some(1))], at(1000)).unwrap();
-        store.upsert_entries(feed, &[entry("2", "After", Some(2))], at(3000)).unwrap();
-        assert_eq!(store.mark_all_read(Scope::Feed(feed), at(0), at(2000)).unwrap(), 1);
+        let shown = store.newest_article_id().unwrap();
+        // Arrives in the same second, after the list was shown.
+        store.upsert_entries(feed, &[entry("2", "After", Some(2))], at(1000)).unwrap();
+        assert_eq!(store.mark_all_read(Scope::Feed(feed), at(0), shown).unwrap(), 1);
         let counts = store.counts(at(0)).unwrap();
         assert_eq!(counts.all, 1);
     }

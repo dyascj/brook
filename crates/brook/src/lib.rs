@@ -89,22 +89,33 @@ fn open_main_window(cx: &mut App) {
 /// Builds the window's content over the library at `db_path`, with images
 /// cached in `cache_dir`. A library that can't be opened shows why instead.
 pub fn root(db_path: &Path, cache_dir: &Path, window: &mut Window, cx: &mut App) -> Entity<Root> {
-    let store = match brook_core::Store::open(db_path) {
-        Ok(store) => store,
+    let view: gpui::AnyView = match workspace(db_path, cache_dir, true, window, cx) {
+        Ok(workspace) => workspace.into(),
         Err(error) => {
             log::error!("opening {} failed: {error}", db_path.display());
             let message = format!("Brook couldn't open its library at {}: {error}", db_path.display());
-            let failure = cx.new(|_| Failure(message.into()));
-            return cx.new(|cx| Root::new(failure, window, cx));
+            cx.new(|_| Failure(message.into())).into()
         }
     };
+    cx.new(|cx| Root::new(view, window, cx))
+}
+
+/// The workspace over the library at `db_path`, with images cached in
+/// `cache_dir`. Offline, images come only from the cache; tests use that.
+pub fn workspace(
+    db_path: &Path,
+    cache_dir: &Path,
+    online: bool,
+    window: &mut Window,
+    cx: &mut App,
+) -> brook_core::Result<Entity<Workspace>> {
+    let store = brook_core::Store::open(db_path)?;
     let library = cx.new(|cx| Library::new(store, db_path, cx));
     theme::apply(library.read(cx).settings.appearance, window, cx);
     let client = library.read(cx).client().clone();
-    let images = cx.new(|_| Images::new(DiskCache::new(cache_dir), client));
+    let images = cx.new(|_| Images::new(DiskCache::new(cache_dir), online.then_some(client)));
     let updater = cx.new(|cx| Updater::new(library.clone(), cx));
-    let workspace = cx.new(|cx| Workspace::new(library, images, updater, window, cx));
-    cx.new(|cx| Root::new(workspace, window, cx))
+    Ok(cx.new(|cx| Workspace::new(library, images, updater, window, cx)))
 }
 
 fn menus() -> Vec<Menu> {
