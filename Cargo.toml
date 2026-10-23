@@ -13,6 +13,7 @@ repository = "https://github.com/dyascj/cozy-rss"
 [workspace.dependencies]
 brook-core = { path = "crates/brook-core" }
 anyhow = "1"
+futures = "0.3"
 thiserror = "2"
 chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 dirs = "6"
@@ -20,6 +21,7 @@ dom_smoothie = "0.18"
 ego-tree = "0.11"
 feed-rs = "3"
 log = "0.4"
+minisign-verify = "0.3"
 quick-xml = "0.42"
 rusqlite = { version = "0.40", features = ["bundled"] }
 scraper = "0.29"
@@ -27,6 +29,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 ureq = "3"
 url = "2"
+env_logger = { version = "0.11", default-features = false, features = ["auto-color", "humantime"] }
 tempfile = "3"
 
 [workspace.lints.rust]
