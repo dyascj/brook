@@ -1,0 +1,47 @@
+[workspace]
+resolver = "3"
+members = ["crates/brook-core", "crates/brook"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+license = "MIT"
+authors = ["Charles Dyas"]
+repository = "https://github.com/dyascj/cozy-rss"
+
+[workspace.dependencies]
+brook-core = { path = "crates/brook-core" }
+anyhow = "1"
+thiserror = "2"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+dirs = "6"
+feed-rs = "3"
+log = "0.4"
+quick-xml = "0.42"
+rusqlite = { version = "0.40", features = ["bundled"] }
+scraper = "0.29"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = "3"
+url = "2"
+tempfile = "3"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+# Keep build caches small: line tables for our code, no debug info for dependencies.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
