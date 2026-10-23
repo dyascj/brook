@@ -165,6 +165,13 @@ fn normalize_entry(entry: Entry) -> ParsedEntry {
         .map(str::to_owned);
 
     let image_url = lead_image(&entry, content_html.as_deref());
+    // Many bodies open by repeating the headline; the excerpt shouldn't.
+    let excerpt_source = match excerpt_source.strip_prefix(title.as_str()) {
+        Some(rest) if !rest.trim().is_empty() => {
+            rest.trim_start_matches(|c: char| c.is_whitespace() || c == ':').to_owned()
+        }
+        _ => excerpt_source,
+    };
 
     ParsedEntry {
         guid: entry.id,
@@ -450,6 +457,17 @@ Second paragraph &amp; more</media:description>
             entry.content_html.as_deref(),
             Some("<p>Line one<br>Line two</p><p>Second paragraph &amp; more</p>")
         );
+    }
+
+    #[test]
+    fn excerpts_skip_a_repeated_headline() {
+        let xml = r#"<rss version="2.0"><channel><title>T</title>
+            <item><title>Big news</title><guid>1</guid><description>&lt;p&gt;&lt;a href="x"&gt;Big news&lt;/a&gt;&lt;/p&gt;&lt;p&gt;The details.&lt;/p&gt;</description></item>
+            <item><title>Only</title><guid>2</guid><description>Only</description></item>
+        </channel></rss>"#;
+        let feed = parse_feed(xml.as_bytes(), "https://x.test/rss").unwrap();
+        assert_eq!(feed.entries[0].excerpt, "The details.");
+        assert_eq!(feed.entries[1].excerpt, "Only", "an excerpt that is only the title stays");
     }
 
     #[test]

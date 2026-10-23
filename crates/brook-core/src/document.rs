@@ -130,6 +130,18 @@ impl Document {
         self
     }
 
+    /// Puts the article's lead image first when the body shows no image or
+    /// video of its own (common in feeds that attach the image separately).
+    pub fn with_lead_image(mut self, image_url: Option<&str>) -> Self {
+        let Some(url) = image_url.filter(|url| url.starts_with("http")) else { return self };
+        let has_media =
+            self.blocks.iter().any(|block| matches!(block, Block::Image { .. } | Block::Video(_)));
+        if !has_media {
+            self.blocks.insert(0, Block::Image { url: url.to_owned(), alt: String::new() });
+        }
+        self
+    }
+
     /// Whether there is nothing to show.
     pub fn is_empty(&self) -> bool {
         self.blocks.is_empty()
@@ -564,6 +576,22 @@ mod tests {
         let embedded = Document::from_html(r#"<iframe src="https://youtu.be/dQw4w9WgXcQ"></iframe>"#, None);
         assert_eq!(embedded.clone().with_lead_video(url), embedded);
         assert_eq!(Document::default().with_lead_video(Some("https://a.test/")), Document::default());
+    }
+
+    #[test]
+    fn lead_image_when_the_body_has_none() {
+        let image = Some("https://cdn.test/hero.jpg");
+        let document = Document::from_text("Words").with_lead_image(image);
+        assert_eq!(
+            document.blocks[0],
+            Block::Image { url: "https://cdn.test/hero.jpg".into(), alt: String::new() }
+        );
+
+        let illustrated = Document::from_html(r#"<p>Hi</p><img src="https://cdn.test/a.png">"#, None);
+        assert_eq!(illustrated.clone().with_lead_image(image), illustrated);
+        let plain = Document::from_text("Words");
+        assert_eq!(plain.clone().with_lead_image(None), plain);
+        assert_eq!(plain.clone().with_lead_image(Some("data:image/png;base64,x")), plain);
     }
 
     #[test]

@@ -6,7 +6,8 @@
 //!     <library.db> <cache-dir> <output-dir>
 //! ```
 //!
-//! The library is copied first, so the screenshots never change it. macOS
+//! `STEPS=n` opens the n-th article in the reading shots (default 2). The
+//! library is copied first, so the screenshots never change it. macOS
 //! only: GPUI's visual test platform renders through Metal.
 
 #[cfg(target_os = "macos")]
@@ -33,6 +34,7 @@ fn main() -> anyhow::Result<()> {
 
     // (file name, appearance, an empty library, action to run first, open an article)
     type Shot = (&'static str, Appearance, bool, Option<Box<dyn Fn() -> Box<dyn gpui::Action>>>, bool);
+    let steps: usize = std::env::var("STEPS").ok().and_then(|v| v.parse().ok()).unwrap_or(2);
     let shots: Vec<Shot> = vec![
         ("reading-light", Appearance::Light, false, None, true),
         ("reading-dark", Appearance::Dark, false, None, true),
@@ -61,8 +63,9 @@ fn main() -> anyhow::Result<()> {
             .into();
         cx.run_until_parked();
         if open_article {
-            cx.dispatch_action(window, NextArticle);
-            cx.dispatch_action(window, NextArticle);
+            for _ in 0..steps {
+                cx.dispatch_action(window, NextArticle);
+            }
         }
         if let Some(action) = action {
             cx.update_window(window, |_, window, cx| window.dispatch_action(action(), cx))?;

@@ -82,6 +82,7 @@ fn feed_document(article: &Article) -> Document {
         None => Document::from_text(&article.summary.excerpt),
     }
     .with_lead_video(url)
+    .with_lead_image(article.summary.image_url.as_deref())
 }
 
 /// What the main area shows.
