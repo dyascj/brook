@@ -16,6 +16,8 @@ anyhow = "1"
 thiserror = "2"
 chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 dirs = "6"
+dom_smoothie = "0.18"
+ego-tree = "0.11"
 feed-rs = "3"
 log = "0.4"
 quick-xml = "0.42"

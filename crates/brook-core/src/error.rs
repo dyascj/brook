@@ -35,6 +35,10 @@ pub enum Error {
     #[error("no feed found at {0}")]
     NoFeedFound(String),
 
+    /// Reader mode found no article on a page.
+    #[error("couldn't find an article on that page")]
+    Unreadable,
+
     /// An OPML document could not be read.
     #[error("could not read OPML: {0}")]
     Opml(String),

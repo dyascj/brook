@@ -11,6 +11,8 @@ repository.workspace = true
 [dependencies]
 chrono.workspace = true
 dirs.workspace = true
+dom_smoothie.workspace = true
+ego-tree.workspace = true
 feed-rs.workspace = true
 log.workspace = true
 quick-xml.workspace = true

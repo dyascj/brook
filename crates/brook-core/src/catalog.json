@@ -1,0 +1,825 @@
+{
+  "categories": [
+    {
+      "id": "tech-programming",
+      "name": "Tech & Programming",
+      "description": "Developer blogs, tech news, open source, and programming resources",
+      "feeds": [
+        {
+          "name": "The Verge",
+          "description": "Technology, science, art, and culture news",
+          "url": "https://www.theverge.com/rss/index.xml",
+          "site_url": "https://www.theverge.com"
+        },
+        {
+          "name": "Ars Technica",
+          "description": "Original news and reviews for tech enthusiasts",
+          "url": "https://feeds.arstechnica.com/arstechnica/index",
+          "site_url": "https://arstechnica.com"
+        },
+        {
+          "name": "TechCrunch",
+          "description": "Startup and technology news",
+          "url": "https://techcrunch.com/feed/",
+          "site_url": "https://techcrunch.com"
+        },
+        {
+          "name": "CSS-Tricks",
+          "description": "Web design and development articles",
+          "url": "https://css-tricks.com/feed/",
+          "site_url": "https://css-tricks.com"
+        },
+        {
+          "name": "Smashing Magazine",
+          "description": "For web designers and developers",
+          "url": "https://www.smashingmagazine.com/feed/",
+          "site_url": "https://www.smashingmagazine.com"
+        },
+        {
+          "name": "A List Apart",
+          "description": "Web design, development, and content strategy",
+          "url": "https://alistapart.com/main/feed/",
+          "site_url": "https://alistapart.com"
+        },
+        {
+          "name": "MIT Technology Review",
+          "description": "Technology news and analysis",
+          "url": "https://www.technologyreview.com/feed/",
+          "site_url": "https://www.technologyreview.com"
+        },
+        {
+          "name": "Wired",
+          "description": "Technology and culture",
+          "url": "https://www.wired.com/feed/rss",
+          "site_url": "https://www.wired.com"
+        },
+        {
+          "name": "The GitHub Blog",
+          "description": "Updates from GitHub",
+          "url": "https://github.blog/feed/",
+          "site_url": "https://github.blog"
+        },
+        {
+          "name": "Hacking with Swift",
+          "description": "Swift and iOS development tutorials",
+          "url": "https://www.hackingwithswift.com/articles/rss",
+          "site_url": "https://www.hackingwithswift.com"
+        },
+        {
+          "name": "Mozilla Hacks",
+          "description": "Web development articles from Mozilla",
+          "url": "https://hacks.mozilla.org/feed/",
+          "site_url": "https://hacks.mozilla.org"
+        },
+        {
+          "name": "web.dev",
+          "description": "Google's resource for modern web development",
+          "url": "https://web.dev/feed.xml",
+          "site_url": "https://web.dev"
+        },
+        {
+          "name": "The Changelog",
+          "description": "News and podcasts for developers",
+          "url": "https://changelog.com/feed",
+          "site_url": "https://changelog.com"
+        },
+        {
+          "name": "InfoQ",
+          "description": "Software development news and articles",
+          "url": "https://www.infoq.com/feed/",
+          "site_url": "https://www.infoq.com"
+        },
+        {
+          "name": "Coding Horror",
+          "description": "Programming and human factors by Jeff Atwood",
+          "url": "https://blog.codinghorror.com/rss/",
+          "site_url": "https://blog.codinghorror.com"
+        },
+        {
+          "name": "Rust Blog",
+          "description": "Release notes and news from the Rust project",
+          "url": "https://blog.rust-lang.org/feed.xml",
+          "site_url": "https://blog.rust-lang.org/"
+        },
+        {
+          "name": "This Week in Rust",
+          "description": "A weekly roundup of the Rust community",
+          "url": "https://this-week-in-rust.org/rss.xml",
+          "site_url": "https://this-week-in-rust.org/"
+        }
+      ]
+    },
+    {
+      "id": "ai-ml",
+      "name": "AI & Machine Learning",
+      "description": "Artificial intelligence research, ML tutorials, and AI news",
+      "feeds": [
+        {
+          "name": "Distill.pub",
+          "description": "Clear explanations of machine learning research",
+          "url": "https://distill.pub/rss.xml",
+          "site_url": "https://distill.pub"
+        },
+        {
+          "name": "Google AI Blog",
+          "description": "Latest news and research from Google AI",
+          "url": "https://blog.google/technology/ai/rss/",
+          "site_url": "https://blog.google/technology/ai/"
+        },
+        {
+          "name": "Hugging Face Blog",
+          "description": "Open source ML tools and models",
+          "url": "https://huggingface.co/blog/feed.xml",
+          "site_url": "https://huggingface.co/blog"
+        },
+        {
+          "name": "The Gradient",
+          "description": "Perspectives on AI research and applications",
+          "url": "https://thegradient.pub/rss/",
+          "site_url": "https://thegradient.pub"
+        },
+        {
+          "name": "Machine Learning Mastery",
+          "description": "Practical machine learning tutorials",
+          "url": "https://machinelearningmastery.com/feed/",
+          "site_url": "https://machinelearningmastery.com"
+        },
+        {
+          "name": "Weights & Biases Blog",
+          "description": "ML experiment tracking and insights",
+          "url": "https://wandb.ai/site/feed",
+          "site_url": "https://wandb.ai/site"
+        },
+        {
+          "name": "AI Alignment Forum",
+          "description": "Discussions on AI safety and alignment",
+          "url": "https://www.alignmentforum.org/feed.xml",
+          "site_url": "https://www.alignmentforum.org"
+        },
+        {
+          "name": "Papers With Code",
+          "description": "Latest ML papers with code implementations",
+          "url": "https://paperswithcode.com/rss/latest",
+          "site_url": "https://paperswithcode.com"
+        },
+        {
+          "name": "Towards Data Science",
+          "description": "Data science and ML articles",
+          "url": "https://towardsdatascience.com/feed",
+          "site_url": "https://towardsdatascience.com"
+        },
+        {
+          "name": "LessWrong",
+          "description": "Rationality and AI safety discussions",
+          "url": "https://www.lesswrong.com/feed.xml",
+          "site_url": "https://www.lesswrong.com"
+        }
+      ]
+    },
+    {
+      "id": "design-creative",
+      "name": "Design & Creative",
+      "description": "UI/UX design, graphic design, illustration, and creative inspiration",
+      "feeds": [
+        {
+          "name": "Dribbble Blog",
+          "description": "Design inspiration and community stories",
+          "url": "https://dribbble.com/stories.rss",
+          "site_url": "https://dribbble.com/stories"
+        },
+        {
+          "name": "Design Observer",
+          "description": "Critical writing about design and visual culture",
+          "url": "https://designobserver.com/feed/",
+          "site_url": "https://designobserver.com"
+        },
+        {
+          "name": "Creative Bloq",
+          "description": "Graphic design, 3D, digital art, and more",
+          "url": "https://www.creativebloq.com/feeds/all",
+          "site_url": "https://www.creativebloq.com"
+        },
+        {
+          "name": "Codrops",
+          "description": "Useful resources and inspiration for web design",
+          "url": "https://tympanus.net/codrops/feed/",
+          "site_url": "https://tympanus.net/codrops"
+        },
+        {
+          "name": "UX Collective",
+          "description": "Curated stories on user experience",
+          "url": "https://uxdesign.cc/feed",
+          "site_url": "https://uxdesign.cc"
+        },
+        {
+          "name": "Nielsen Norman Group",
+          "description": "Evidence-based UX research and design",
+          "url": "https://www.nngroup.com/feed/rss/",
+          "site_url": "https://www.nngroup.com"
+        },
+        {
+          "name": "99U",
+          "description": "Insights on making ideas happen",
+          "url": "https://99u.adobe.com/feed",
+          "site_url": "https://99u.adobe.com"
+        },
+        {
+          "name": "Muzli Design Weekly",
+          "description": "Design inspiration and resources",
+          "url": "https://medium.com/feed/muzli-design-inspiration",
+          "site_url": "https://muz.li"
+        },
+        {
+          "name": "Swiss Miss",
+          "description": "Design blog by Tina Roth Eisenberg",
+          "url": "https://www.swiss-miss.com/feed",
+          "site_url": "https://www.swiss-miss.com"
+        },
+        {
+          "name": "Designmodo",
+          "description": "Web design tools and resources",
+          "url": "https://designmodo.com/feed/",
+          "site_url": "https://designmodo.com"
+        },
+        {
+          "name": "Abduzeedo",
+          "description": "Design inspiration and tutorials",
+          "url": "https://abduzeedo.com/feed",
+          "site_url": "https://abduzeedo.com"
+        }
+      ]
+    },
+    {
+      "id": "indie-blogs",
+      "name": "Indie Blogs",
+      "description": "Personal blogs and independent writers worth following",
+      "feeds": [
+        {
+          "name": "Julia Evans",
+          "description": "Programming explanations with comics",
+          "url": "https://jvns.ca/atom.xml",
+          "site_url": "https://jvns.ca"
+        },
+        {
+          "name": "Dan Luu",
+          "description": "In-depth engineering analysis",
+          "url": "https://danluu.com/atom.xml",
+          "site_url": "https://danluu.com"
+        },
+        {
+          "name": "Paul Graham",
+          "description": "Essays on startups and programming",
+          "url": "http://www.aaronsw.com/2002/feeds/pgessays.rss",
+          "site_url": "http://paulgraham.com"
+        },
+        {
+          "name": "Simon Willison",
+          "description": "Web development and AI tools",
+          "url": "https://simonwillison.net/atom/everything/",
+          "site_url": "https://simonwillison.net"
+        },
+        {
+          "name": "Overreacted",
+          "description": "Dan Abramov on React and JavaScript",
+          "url": "https://overreacted.io/rss.xml",
+          "site_url": "https://overreacted.io"
+        },
+        {
+          "name": "Kent C. Dodds",
+          "description": "React, testing, and JavaScript best practices",
+          "url": "https://kentcdodds.com/blog/rss.xml",
+          "site_url": "https://kentcdodds.com"
+        },
+        {
+          "name": "Wait But Why",
+          "description": "Long-form explanatory posts",
+          "url": "https://waitbutwhy.com/feed",
+          "site_url": "https://waitbutwhy.com"
+        },
+        {
+          "name": "Derek Sivers",
+          "description": "Thoughts on life, business, and creativity",
+          "url": "https://sive.rs/en.atom",
+          "site_url": "https://sive.rs"
+        },
+        {
+          "name": "Seth Godin",
+          "description": "Daily blog on marketing and leadership",
+          "url": "https://seths.blog/feed/",
+          "site_url": "https://seths.blog"
+        },
+        {
+          "name": "Cal Newport",
+          "description": "Deep work and productivity",
+          "url": "https://calnewport.com/feed/",
+          "site_url": "https://calnewport.com"
+        },
+        {
+          "name": "James Clear",
+          "description": "Habits and continuous improvement",
+          "url": "https://jamesclear.com/feed",
+          "site_url": "https://jamesclear.com"
+        },
+        {
+          "name": "Maggie Appleton",
+          "description": "Visual essays on technology and design",
+          "url": "https://maggieappleton.com/rss.xml",
+          "site_url": "https://maggieappleton.com"
+        }
+      ]
+    },
+    {
+      "id": "news-current-events",
+      "name": "News & Current Events",
+      "description": "World news, politics, business, and current affairs",
+      "feeds": [
+        {
+          "name": "BBC News",
+          "description": "Breaking news and analysis from the BBC",
+          "url": "https://feeds.bbci.co.uk/news/rss.xml",
+          "site_url": "https://www.bbc.com/news"
+        },
+        {
+          "name": "NPR News",
+          "description": "National and international news from NPR",
+          "url": "https://feeds.npr.org/1001/rss.xml",
+          "site_url": "https://www.npr.org"
+        },
+        {
+          "name": "The Guardian - World",
+          "description": "World news from The Guardian",
+          "url": "https://www.theguardian.com/world/rss",
+          "site_url": "https://www.theguardian.com/world"
+        },
+        {
+          "name": "Al Jazeera English",
+          "description": "International news and current affairs",
+          "url": "https://www.aljazeera.com/xml/rss/all.xml",
+          "site_url": "https://www.aljazeera.com"
+        },
+        {
+          "name": "CNN Top Stories",
+          "description": "Breaking news from CNN",
+          "url": "http://rss.cnn.com/rss/cnn_topstories.rss",
+          "site_url": "https://www.cnn.com"
+        },
+        {
+          "name": "ABC News",
+          "description": "Top headlines from ABC News",
+          "url": "https://abcnews.go.com/abcnews/topstories",
+          "site_url": "https://abcnews.go.com"
+        },
+        {
+          "name": "BBC News - Technology",
+          "description": "Technology news from BBC",
+          "url": "https://feeds.bbci.co.uk/news/technology/rss.xml",
+          "site_url": "https://www.bbc.com/news/technology"
+        },
+        {
+          "name": "The Guardian - Technology",
+          "description": "Technology news from The Guardian",
+          "url": "https://www.theguardian.com/uk/technology/rss",
+          "site_url": "https://www.theguardian.com/technology"
+        },
+        {
+          "name": "NPR Technology",
+          "description": "Technology stories from NPR",
+          "url": "https://feeds.npr.org/1019/rss.xml",
+          "site_url": "https://www.npr.org/sections/technology"
+        },
+        {
+          "name": "New York Times World",
+          "description": "World news from the New York Times",
+          "url": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+          "site_url": "https://www.nytimes.com/section/world"
+        }
+      ]
+    },
+    {
+      "id": "youtube",
+      "name": "YouTube",
+      "description": "Popular YouTube channels for tech, education, entertainment, and more",
+      "feeds": [
+        {
+          "name": "MKBHD",
+          "description": "Quality tech videos from Marques Brownlee",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ",
+          "site_url": "https://www.youtube.com/@mkbhd"
+        },
+        {
+          "name": "Fireship",
+          "description": "Fast-paced coding tutorials and tech news in 100 seconds",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCsBjURrPoezykLs9EqgamOA",
+          "site_url": "https://www.youtube.com/@Fireship"
+        },
+        {
+          "name": "Linus Tech Tips",
+          "description": "Tech tips, unboxing, and reviews",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+          "site_url": "https://www.youtube.com/@LinusTechTips"
+        },
+        {
+          "name": "Veritasium",
+          "description": "Science and engineering videos with stunning visuals",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA",
+          "site_url": "https://www.youtube.com/@veritasium"
+        },
+        {
+          "name": "3Blue1Brown",
+          "description": "Animated math explanations",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw",
+          "site_url": "https://www.youtube.com/@3blue1brown"
+        },
+        {
+          "name": "Theo - t3.gg",
+          "description": "Web development, React, and TypeScript content",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCbRP3c757lWg9M-U7TyEkXA",
+          "site_url": "https://www.youtube.com/@t3dotgg"
+        },
+        {
+          "name": "The Primeagen",
+          "description": "Programming, Vim, and developer content",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC8ENHE5xdFSwx71u3fDH5Xw",
+          "site_url": "https://www.youtube.com/@ThePrimeagen"
+        },
+        {
+          "name": "Traversy Media",
+          "description": "Web development tutorials and crash courses",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC29ju8bIPH5as8OGnQzwJyA",
+          "site_url": "https://www.youtube.com/@TraversyMedia"
+        },
+        {
+          "name": "Lex Fridman",
+          "description": "Podcast conversations about AI, science, and life",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA",
+          "site_url": "https://www.youtube.com/@lexfridman"
+        },
+        {
+          "name": "Two Minute Papers",
+          "description": "AI and machine learning research explained",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg",
+          "site_url": "https://www.youtube.com/@TwoMinutePapers"
+        },
+        {
+          "name": "Kurzgesagt – In a Nutshell",
+          "description": "Beautifully animated science explainers",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q",
+          "site_url": "https://www.youtube.com/@kurzgesagt"
+        },
+        {
+          "name": "Tom Scott",
+          "description": "Fascinating facts about language, technology, and more",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCBa659QWEk1AI4Tg--mrJ2A",
+          "site_url": "https://www.youtube.com/@TomScottGo"
+        },
+        {
+          "name": "NetworkChuck",
+          "description": "Networking, cybersecurity, and IT tutorials",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC9x0AN7BWHpCDHSm9NiJFJQ",
+          "site_url": "https://www.youtube.com/@NetworkChuck"
+        },
+        {
+          "name": "Web Dev Simplified",
+          "description": "Making web development simple and fun",
+          "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCFbNIlppjAuEX4znoulh0Cw",
+          "site_url": "https://www.youtube.com/@WebDevSimplified"
+        }
+      ]
+    },
+    {
+      "id": "social-media",
+      "name": "Social & Communities",
+      "description": "Hacker News, Reddit, Lobsters, and developer communities",
+      "feeds": [
+        {
+          "name": "Hacker News - Front Page",
+          "description": "Top stories from Y Combinator's Hacker News",
+          "url": "https://hnrss.org/frontpage",
+          "site_url": "https://news.ycombinator.com"
+        },
+        {
+          "name": "Hacker News - Best",
+          "description": "Best stories from Hacker News",
+          "url": "https://hnrss.org/best",
+          "site_url": "https://news.ycombinator.com/best"
+        },
+        {
+          "name": "Hacker News - New",
+          "description": "Newest stories from Hacker News",
+          "url": "https://hnrss.org/newest",
+          "site_url": "https://news.ycombinator.com/newest"
+        },
+        {
+          "name": "Lobsters",
+          "description": "Computing-focused community link aggregation",
+          "url": "https://lobste.rs/rss",
+          "site_url": "https://lobste.rs"
+        },
+        {
+          "name": "Lobsters - Newest",
+          "description": "Newest stories on Lobsters",
+          "url": "https://lobste.rs/newest.rss",
+          "site_url": "https://lobste.rs/newest"
+        },
+        {
+          "name": "Echo JS",
+          "description": "JavaScript news and articles",
+          "url": "https://www.echojs.com/rss",
+          "site_url": "https://www.echojs.com"
+        },
+        {
+          "name": "DEV Community",
+          "description": "Community of software developers",
+          "url": "https://dev.to/feed",
+          "site_url": "https://dev.to"
+        },
+        {
+          "name": "Hashnode",
+          "description": "Developer blogging platform",
+          "url": "https://hashnode.com/feed",
+          "site_url": "https://hashnode.com"
+        },
+        {
+          "name": "Product Hunt - Daily",
+          "description": "Discover new products every day",
+          "url": "https://www.producthunt.com/feed",
+          "site_url": "https://www.producthunt.com"
+        },
+        {
+          "name": "Designer News",
+          "description": "Community-curated design news",
+          "url": "https://www.designernews.co/?format=rss",
+          "site_url": "https://www.designernews.co"
+        },
+        {
+          "name": "Sidebar.io",
+          "description": "5 best design links every day",
+          "url": "https://sidebar.io/feed.xml",
+          "site_url": "https://sidebar.io"
+        }
+      ]
+    },
+    {
+      "id": "gaming",
+      "name": "Gaming",
+      "description": "Video game news, reviews, esports, and gaming culture",
+      "feeds": [
+        {
+          "name": "PC Gamer",
+          "description": "PC gaming news, reviews, and features",
+          "url": "https://www.pcgamer.com/rss/",
+          "site_url": "https://www.pcgamer.com"
+        },
+        {
+          "name": "Rock Paper Shotgun",
+          "description": "PC gaming news with personality",
+          "url": "https://www.rockpapershotgun.com/feed",
+          "site_url": "https://www.rockpapershotgun.com"
+        },
+        {
+          "name": "Eurogamer",
+          "description": "European gaming news and reviews",
+          "url": "https://www.eurogamer.net/feed",
+          "site_url": "https://www.eurogamer.net"
+        },
+        {
+          "name": "Polygon",
+          "description": "Gaming and entertainment news",
+          "url": "https://www.polygon.com/rss/index.xml",
+          "site_url": "https://www.polygon.com"
+        },
+        {
+          "name": "Kotaku",
+          "description": "Gaming news and culture",
+          "url": "https://kotaku.com/rss",
+          "site_url": "https://kotaku.com"
+        },
+        {
+          "name": "IGN",
+          "description": "Video game, movie and TV reviews",
+          "url": "https://feeds.feedburner.com/ign/all",
+          "site_url": "https://www.ign.com"
+        },
+        {
+          "name": "GameSpot",
+          "description": "Video game news and reviews",
+          "url": "https://www.gamespot.com/feeds/mashup/",
+          "site_url": "https://www.gamespot.com"
+        },
+        {
+          "name": "Destructoid",
+          "description": "Video game news and reviews",
+          "url": "https://www.destructoid.com/feed/",
+          "site_url": "https://www.destructoid.com"
+        },
+        {
+          "name": "GamesRadar+",
+          "description": "Gaming news across all platforms",
+          "url": "https://www.gamesradar.com/rss/",
+          "site_url": "https://www.gamesradar.com"
+        },
+        {
+          "name": "Gamasutra",
+          "description": "Game development industry news",
+          "url": "https://www.gamedeveloper.com/rss.xml",
+          "site_url": "https://www.gamedeveloper.com"
+        }
+      ]
+    },
+    {
+      "id": "entertainment-media",
+      "name": "Entertainment & Media",
+      "description": "Movies, TV, music, and pop culture",
+      "feeds": [
+        {
+          "name": "The A.V. Club",
+          "description": "Pop culture reviews and news",
+          "url": "https://www.avclub.com/rss",
+          "site_url": "https://www.avclub.com"
+        },
+        {
+          "name": "Pitchfork",
+          "description": "Music reviews and news",
+          "url": "https://pitchfork.com/feed/feed-news/rss",
+          "site_url": "https://pitchfork.com"
+        },
+        {
+          "name": "IndieWire",
+          "description": "Independent film news and criticism",
+          "url": "https://www.indiewire.com/feed/",
+          "site_url": "https://www.indiewire.com"
+        },
+        {
+          "name": "Screen Rant",
+          "description": "Movie and TV news, reviews, and features",
+          "url": "https://screenrant.com/feed/",
+          "site_url": "https://screenrant.com"
+        },
+        {
+          "name": "Rolling Stone",
+          "description": "Music, culture, and politics",
+          "url": "https://www.rollingstone.com/feed/",
+          "site_url": "https://www.rollingstone.com"
+        },
+        {
+          "name": "Variety",
+          "description": "Entertainment industry news",
+          "url": "https://variety.com/feed/",
+          "site_url": "https://variety.com"
+        },
+        {
+          "name": "The Hollywood Reporter",
+          "description": "Entertainment news and analysis",
+          "url": "https://www.hollywoodreporter.com/feed/",
+          "site_url": "https://www.hollywoodreporter.com"
+        },
+        {
+          "name": "Consequence",
+          "description": "Music, film, and TV news",
+          "url": "https://consequence.net/feed/",
+          "site_url": "https://consequence.net"
+        },
+        {
+          "name": "Stereogum",
+          "description": "Music news and reviews",
+          "url": "https://www.stereogum.com/feed/",
+          "site_url": "https://www.stereogum.com"
+        }
+      ]
+    },
+    {
+      "id": "podcasts-newsletters",
+      "name": "Podcasts & Newsletters",
+      "description": "Audio shows and curated email newsletters with RSS feeds",
+      "feeds": [
+        {
+          "name": "This American Life",
+          "description": "True stories, told well",
+          "url": "https://www.thisamericanlife.org/podcast/rss.xml",
+          "site_url": "https://www.thisamericanlife.org"
+        },
+        {
+          "name": "99% Invisible",
+          "description": "Design and architecture podcast",
+          "url": "https://feeds.simplecast.com/BqbsxVfO",
+          "site_url": "https://99percentinvisible.org"
+        },
+        {
+          "name": "Radiolab",
+          "description": "Science and philosophy stories",
+          "url": "https://feeds.simplecast.com/EmVW7VGp",
+          "site_url": "https://radiolab.org"
+        },
+        {
+          "name": "The Vergecast",
+          "description": "Tech news and discussion",
+          "url": "https://feeds.megaphone.fm/vergecast",
+          "site_url": "https://www.theverge.com/the-vergecast"
+        },
+        {
+          "name": "Dense Discovery",
+          "description": "Weekly newsletter on design, tech, and sustainability",
+          "url": "https://www.densediscovery.com/feed",
+          "site_url": "https://www.densediscovery.com"
+        },
+        {
+          "name": "JavaScript Weekly",
+          "description": "Weekly roundup of JavaScript news and articles",
+          "url": "https://javascriptweekly.com/rss/",
+          "site_url": "https://javascriptweekly.com"
+        },
+        {
+          "name": "Node Weekly",
+          "description": "Weekly Node.js news and links",
+          "url": "https://nodeweekly.com/rss/",
+          "site_url": "https://nodeweekly.com"
+        },
+        {
+          "name": "React Status",
+          "description": "Weekly React news and links",
+          "url": "https://react.statuscode.com/rss/",
+          "site_url": "https://react.statuscode.com"
+        },
+        {
+          "name": "Planet Money",
+          "description": "NPR podcast about the economy",
+          "url": "https://feeds.npr.org/510289/podcast.xml",
+          "site_url": "https://www.npr.org/sections/money/"
+        },
+        {
+          "name": "Software Engineering Daily",
+          "description": "Technical interviews about software",
+          "url": "https://softwareengineeringdaily.com/feed/podcast/",
+          "site_url": "https://softwareengineeringdaily.com"
+        }
+      ]
+    },
+    {
+      "id": "lifestyle-other",
+      "name": "Science & Lifestyle",
+      "description": "Science, health, sports, food, travel, and personal interests",
+      "feeds": [
+        {
+          "name": "Lifehacker",
+          "description": "Tips for a more efficient life",
+          "url": "https://lifehacker.com/feed/rss",
+          "site_url": "https://lifehacker.com"
+        },
+        {
+          "name": "Science Daily",
+          "description": "Latest science news and research",
+          "url": "https://www.sciencedaily.com/rss/all.xml",
+          "site_url": "https://www.sciencedaily.com"
+        },
+        {
+          "name": "Quanta Magazine",
+          "description": "In-depth science and math journalism",
+          "url": "https://www.quantamagazine.org/feed/",
+          "site_url": "https://www.quantamagazine.org"
+        },
+        {
+          "name": "ESPN",
+          "description": "Sports news and scores",
+          "url": "https://www.espn.com/espn/rss/news",
+          "site_url": "https://www.espn.com"
+        },
+        {
+          "name": "Space.com",
+          "description": "Space exploration and astronomy news",
+          "url": "https://www.space.com/feeds/all",
+          "site_url": "https://www.space.com"
+        },
+        {
+          "name": "New Scientist",
+          "description": "Science and technology news",
+          "url": "https://www.newscientist.com/feed/home/",
+          "site_url": "https://www.newscientist.com"
+        },
+        {
+          "name": "Nature News",
+          "description": "Latest research news from Nature",
+          "url": "https://www.nature.com/nature.rss",
+          "site_url": "https://www.nature.com"
+        },
+        {
+          "name": "Popular Science",
+          "description": "Science and technology for everyone",
+          "url": "https://www.popsci.com/feed/",
+          "site_url": "https://www.popsci.com"
+        },
+        {
+          "name": "Aeon Essays",
+          "description": "Deep essays on philosophy and ideas",
+          "url": "https://aeon.co/feed.rss",
+          "site_url": "https://aeon.co"
+        },
+        {
+          "name": "Smithsonian Magazine",
+          "description": "Science, history, and culture stories",
+          "url": "https://www.smithsonianmag.com/rss/latest_articles/",
+          "site_url": "https://www.smithsonianmag.com"
+        }
+      ]
+    }
+  ]
+}
