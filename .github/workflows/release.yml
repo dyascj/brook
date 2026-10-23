@@ -1,8 +1,8 @@
 name: release
 
 # Push a vX.Y.Z tag to publish. The tag must match the version in Cargo.toml
-# and release-notes/vX.Y.Z.md must exist. Every asset is signed with
-# MINISIGN_SECRET_KEY; the app checks those signatures before it updates.
+# and release-notes/vX.Y.Z.md must exist. The publish job signs every asset
+# with MINISIGN_SECRET_KEY; the app checks those signatures before it updates.
 
 on:
   push:
@@ -35,24 +35,12 @@ jobs:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
       - name: Build
         run: UNIVERSAL=1 scripts/bundle-macos.sh
-      - name: Sign for the updater
-        env:
-          KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
-        run: |
-          brew install minisign
-          printf '%s\n' "$KEY" > key
-          for f in Brook.zip Brook-macos.app.tar.gz; do
-            minisign -S -s key -m "dist/$f" -t "Brook $GITHUB_REF_NAME $f" < /dev/null
-          done
-          rm key
       - uses: actions/upload-artifact@v5
         with:
           name: macos
           path: |
             dist/Brook.zip
-            dist/Brook.zip.minisig
             dist/Brook-macos.app.tar.gz
-            dist/Brook-macos.app.tar.gz.minisig
 
   linux:
     needs: check
@@ -65,31 +53,35 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Install Linux libraries
-        run: scripts/linux-deps.sh && sudo apt-get install -y minisign
+        run: scripts/linux-deps.sh
       - name: Build
         run: scripts/bundle-linux.sh
-      - name: Sign for the updater
-        env:
-          KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
-        run: |
-          printf '%s\n' "$KEY" > key
-          f=$(basename dist/Brook-linux-*.tar.gz)
-          minisign -S -s key -m "dist/$f" -t "Brook $GITHUB_REF_NAME $f" < /dev/null
-          rm key
       - uses: actions/upload-artifact@v5
         with:
           name: linux-${{ matrix.runner }}
-          path: dist/Brook-linux-*
+          path: dist/Brook-linux-*.tar.gz
 
+  # Signing happens in one place, on macOS, where Homebrew has minisign.
   publish:
     needs: [macos, linux]
-    runs-on: ubuntu-22.04
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v5
         with:
           path: dist
           merge-multiple: true
+      - name: Sign for the updater
+        env:
+          KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+        run: |
+          brew install minisign
+          printf '%s\n' "$KEY" > key
+          for path in dist/*; do
+            f=$(basename "$path")
+            minisign -S -s key -m "$path" -t "Brook $GITHUB_REF_NAME $f" < /dev/null
+          done
+          rm key
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
