@@ -11,11 +11,18 @@
 
 #![warn(missing_docs)]
 
+pub mod discover;
 pub mod error;
+pub mod http;
 pub mod model;
+pub mod opml;
 pub mod parse;
+pub mod refresh;
 pub mod store;
 pub mod text;
+
+#[cfg(test)]
+mod testing;
 
 pub use error::{Error, Result};
 pub use store::Store;
