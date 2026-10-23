@@ -1,0 +1,98 @@
+name: release
+
+# Push a vX.Y.Z tag to publish. The tag must match the version in Cargo.toml
+# and release-notes/vX.Y.Z.md must exist. Every asset is signed with
+# MINISIGN_SECRET_KEY; the app checks those signatures before it updates.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag, version, and notes agree
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          test "${GITHUB_REF_NAME#v}" = "$version" \
+            || { echo "::error::tag $GITHUB_REF_NAME does not match Cargo.toml version $version"; exit 1; }
+          test -f "release-notes/$GITHUB_REF_NAME.md" \
+            || { echo "::error::write release-notes/$GITHUB_REF_NAME.md before tagging"; exit 1; }
+
+  macos:
+    needs: check
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - name: Build
+        run: UNIVERSAL=1 scripts/bundle-macos.sh
+      - name: Sign for the updater
+        env:
+          KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+        run: |
+          brew install minisign
+          printf '%s\n' "$KEY" > key
+          for f in Brook.zip Brook-macos.app.tar.gz; do
+            minisign -S -s key -m "dist/$f" -t "Brook $GITHUB_REF_NAME $f" < /dev/null
+          done
+          rm key
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: |
+            dist/Brook.zip
+            dist/Brook.zip.minisig
+            dist/Brook-macos.app.tar.gz
+            dist/Brook-macos.app.tar.gz.minisig
+
+  linux:
+    needs: check
+    strategy:
+      matrix:
+        runner: [ubuntu-22.04, ubuntu-22.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux libraries
+        run: scripts/linux-deps.sh && sudo apt-get install -y minisign
+      - name: Build
+        run: scripts/bundle-linux.sh
+      - name: Sign for the updater
+        env:
+          KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+        run: |
+          printf '%s\n' "$KEY" > key
+          f=$(basename dist/Brook-linux-*.tar.gz)
+          minisign -S -s key -m "dist/$f" -t "Brook $GITHUB_REF_NAME $f" < /dev/null
+          rm key
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.runner }}
+          path: dist/Brook-linux-*
+
+  publish:
+    needs: [macos, linux]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --title "Brook ${GITHUB_REF_NAME#v}" \
+            --notes-file "release-notes/$GITHUB_REF_NAME.md" dist/*

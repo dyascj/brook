@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Brook
+GenericName=Feed Reader
+Comment=A calm, local RSS reader
+Exec=brook
+Icon=io.github.dyascj.brook
+Terminal=false
+Categories=Network;News;Feed;
+Keywords=rss;atom;feed;news;reader;
+StartupWMClass=io.github.dyascj.brook
